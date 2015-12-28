@@ -29,7 +29,7 @@ public aspect HasNextNew {
 	public static volatile int has_next_counter = 0;
 	public static volatile int error_counter = 0;
 	
-	public static long overhed = 0;
+	public static long overhead = 0;
 	
 	pointcut HasNext_hasnext1(Iterator i) : (call(* Iterator.hasNext()) && target(i)) 
 	&& !within(HasNextNew) && !adviceexecution();
@@ -39,25 +39,32 @@ public aspect HasNextNew {
 		
 		has_next_counter++;
 		if(one_state.contains(i))
+		{
+			overhead += System.currentTimeMillis() - start;
 			return;
+		}
 		
 		else if(two_state.contains(i))
 		{
 			two_state.remove(i);
 			one_state.add(i);
+			overhead += System.currentTimeMillis() - start;
 			return;
 		}
 		else if(error_state.contains(i))
 		{
+			overhead += System.currentTimeMillis() - start;
 			error_counter++;
 			System.err.println(i + " in error state");
 			//final_printer();
+			overhead += System.currentTimeMillis() - start;
 			return;
 		}
 		else
-		{
 			one_state.add(i);
-		}
+		
+		
+		overhead += System.currentTimeMillis() - start;
 		
 	}
 
@@ -65,11 +72,14 @@ public aspect HasNextNew {
 	&& !within(HasNextNew) && !adviceexecution();
 	before (Iterator i) : HasNext_next1(i) 
 	{
+		long start = System.currentTimeMillis();
+		
 		next_counter++;
 		if(one_state.contains(i))
 		{
 			one_state.remove(i);
 			two_state.add(i);
+			overhead += System.currentTimeMillis() - start;
 			return;
 		}
 		else if(two_state.contains(i))
@@ -80,6 +90,7 @@ public aspect HasNextNew {
 			System.err.println(i + " transition to error state");
 			error_counter++;
 			final_printer();
+			overhead += System.currentTimeMillis() - start;
 			return;
 		}
 		else if(error_state.contains(i))
@@ -87,6 +98,7 @@ public aspect HasNextNew {
 			error_counter++;
 			System.err.println(i + " in error state");
 			//final_printer();
+			overhead += System.currentTimeMillis() - start;
 			return;
 		}
 	}
@@ -97,7 +109,7 @@ public aspect HasNextNew {
 		System.out.println("next : " + next_counter);
 		System.out.println("has next : " + has_next_counter);
 		System.out.println("error : " + error_counter);
-		
+		System.out.println("overhead : " + overhead + " ms");
 	}
 	
 	public static void final_printer()
@@ -105,6 +117,7 @@ public aspect HasNextNew {
 		System.out.println("next : " + next_counter);
 		System.out.println("has next : " + has_next_counter);
 		System.out.println("error : " + error_counter);
+		System.out.println("overhead : " + overhead + " ms");
 	}
 
 	
