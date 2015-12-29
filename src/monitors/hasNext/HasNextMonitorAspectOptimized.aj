@@ -342,11 +342,15 @@ public aspect HasNextMonitorAspectOptimized {
 	pointcut System_exit(): (call (* System.exit(int)));
 	before(): System_exit(){
 		//System.err.println("About to print the statistics--- \n");
+		System.err.println("The number of monitors created are : " + monitor_counter);
+		System.err.println("HasNext counter : " + has_next_counter);
+		System.err.println("next counter : " + next_counter);
 	}
 
 	void around(): System_exit(){
-		//System.out.println("The number of monitors created are: " + num_monitors);
-		//System.out.println("Number of trees matching: "+num_matches);
+		System.err.println("The number of monitors created are : " + monitor_counter);
+		System.err.println("HasNext counter : " + has_next_counter);
+		System.err.println("next counter : " + next_counter);
 	}
 
 	pointcut mainMethod(): execution (public static void main(String[]));
