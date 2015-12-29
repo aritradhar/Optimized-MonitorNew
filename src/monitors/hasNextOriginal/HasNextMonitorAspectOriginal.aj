@@ -1,10 +1,142 @@
-package monitors.hasNext;
+package monitors.hasNextOriginal;
 /* Original JavaMOP 2.1 aspect for HasNext property */
 import java.io.*;
 import java.util.*;
 import org.apache.commons.collections.map.*;
 import java.lang.ref.WeakReference;
 
+class HasNextMonitor_1 implements Cloneable {
+	public Object clone() {
+		try {
+			HasNextMonitor_1 ret = (HasNextMonitor_1) super.clone();
+			return ret;
+		}
+		catch (CloneNotSupportedException e) {
+			throw new InternalError(e.toString());
+		}
+	}
+	int state;
+	int event;
+
+	boolean MOP_fail = false;
+
+	public HasNextMonitor_1 () {
+		state = 0;
+		event = -1;
+
+	}
+	synchronized public final void create(Iterator i) {
+		event = 1;
+
+		switch(state) {
+			case 0:
+			switch(event) {
+				case 1 : state = 3; break;
+				default : state = -1; break;
+			}
+			break;
+			case 1:
+			switch(event) {
+				default : state = -1; break;
+			}
+			break;
+			case 2:
+			switch(event) {
+				case 3 : state = 3; break;
+				case 2 : state = 2; break;
+				default : state = -1; break;
+			}
+			break;
+			case 3:
+			switch(event) {
+				case 3 : state = 1; break;
+				case 2 : state = 2; break;
+				default : state = -1; break;
+			}
+			break;
+			default : state = -1;
+		}
+
+		MOP_fail = state == -1;
+	}
+	synchronized public final void hasnext(Iterator i) {
+		event = 2;
+
+		switch(state) {
+			case 0:
+			switch(event) {
+				case 1 : state = 3; break;
+				default : state = -1; break;
+			}
+			break;
+			case 1:
+			switch(event) {
+				default : state = -1; break;
+			}
+			break;
+			case 2:
+			switch(event) {
+				case 3 : state = 3; break;
+				case 2 : state = 2; break;
+				default : state = -1; break;
+			}
+			break;
+			case 3:
+			switch(event) {
+				case 3 : state = 1; break;
+				case 2 : state = 2; break;
+				default : state = -1; break;
+			}
+			break;
+			default : state = -1;
+		}
+
+		MOP_fail = state == -1;
+	}
+	synchronized public final void next(Iterator i) {
+		event = 3;
+
+		switch(state) {
+			case 0:
+			switch(event) {
+				case 1 : state = 3; break;
+				default : state = -1; break;
+			}
+			break;
+			case 1:
+			switch(event) {
+				default : state = -1; break;
+			}
+			break;
+			case 2:
+			switch(event) {
+				case 3 : state = 3; break;
+				case 2 : state = 2; break;
+				default : state = -1; break;
+			}
+			break;
+			case 3:
+			switch(event) {
+				case 3 : state = 1; break;
+				case 2 : state = 2; break;
+				default : state = -1; break;
+			}
+			break;
+			default : state = -1;
+		}
+
+		MOP_fail = state == -1;
+	}
+	synchronized public final boolean MOP_fail() {
+		return MOP_fail;
+	}
+	synchronized public final void reset() {
+		state = 0;
+		event = -1;
+
+		MOP_fail = false;
+	}
+}
 
 public aspect HasNextMonitorAspectOriginal {
 	static Map makeMap(Object key){
@@ -21,7 +153,7 @@ public aspect HasNextMonitorAspectOriginal {
 	static Map indexing_lock = new HashMap();
 
 	static Map HasNext_i_Map = null;
-	
+	static volatile int monitor_counter = 0, has_next_counter = 0, next_counter = 0;
 	
 	pointcut HasNext_create1() : (call(Iterator Collection+.iterator())) && !within(HasNextMonitor_1) && !within(HasNextMonitorAspectOriginal) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
 	after () returning (Iterator i) : HasNext_create1() {
@@ -46,6 +178,7 @@ public aspect HasNextMonitorAspectOriginal {
 			toCreate = (monitor == null);
 			if (toCreate){
 			
+				monitor_counter++;
 				monitor = new HasNextMonitor_1();
 				m.put(i, monitor);
 														
@@ -65,6 +198,9 @@ public aspect HasNextMonitorAspectOriginal {
 
 	pointcut HasNext_hasnext1(Iterator i) : (call(* Iterator.hasNext()) && target(i)) && !within(HasNextMonitor_1) && !within(HasNextMonitorAspectOriginal) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
 	after (Iterator i) : HasNext_hasnext1(i) {
+		
+		has_next_counter++;
+		
 		boolean skipAroundAdvice = false;
 		Object obj = null;
 
@@ -96,6 +232,9 @@ public aspect HasNextMonitorAspectOriginal {
 
 	pointcut HasNext_next1(Iterator i) : (call(* Iterator.next()) && target(i)) && !within(HasNextMonitor_1) && !within(HasNextMonitorAspectOriginal) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
 	before (Iterator i) : HasNext_next1(i) {
+		
+		next_counter++;
+		
 		boolean skipAroundAdvice = false;
 		Object obj = null;
 
@@ -131,8 +270,9 @@ public aspect HasNextMonitorAspectOriginal {
 		}
        
 		void around(): System_exit(){
-			// System.out.println("The number of monitors created are: " + num_monitors);
-			//System.out.println("Number of trees matching: "+num_matches);
+			System.err.println("The number of monitors created are : " + monitor_counter);
+			System.err.println("hasNext counter : " + has_next_counter);
+			System.err.println("next counter : " + next_counter);
 		}
 	
 	pointcut mainMethod(): execution (public static void main(String[]));
