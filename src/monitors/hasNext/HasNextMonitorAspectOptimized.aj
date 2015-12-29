@@ -1,14 +1,11 @@
 package monitors.hasNext;
 /* Original JavaMOP 2.1 aspect for HasNext property */
-import java.io.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.collections.map.*;
 
 import trace.StackTrace;
-
-import java.lang.ref.WeakReference;
 
 class HasNextMonitor_1 implements Cloneable {
 	public Object clone() {
@@ -200,11 +197,13 @@ public aspect HasNextMonitorAspectOptimized {
 		return new ArrayList<>();
 	}
 
-	static Map<Object, Object> indexing_lock = new HashMap<>();
+	static volatile Map<Object, Object> indexing_lock = new HashMap<>();
 
-	static Map<Object, Object> HasNext_i_Map = null;
+	static volatile Map<Object, Object> HasNext_i_Map = null;
 
-	static Map<Long, List<Object>> monitor_trace_map = new ConcurrentHashMap<>();
+	static volatile Map<Long, List<Object>> monitor_trace_map = new ConcurrentHashMap<>();
+	
+	static volatile int monitor_counter = 0, has_next_counter = 0, next_counter = 0;
 
 	pointcut HasNext_create1() : (call(Iterator Collection+.iterator())) && !within(HasNextMonitor_1) && !within(HasNextMonitorAspectOptimized) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
 	@SuppressWarnings("rawtypes")
@@ -244,6 +243,7 @@ public aspect HasNextMonitorAspectOptimized {
 						m.put(i, monitor);
 						monitors.add(monitor);
 						monitor_trace_map.put(currentStackTrace, monitors);
+						monitor_counter++;
 					}
 				}
 				
@@ -252,8 +252,9 @@ public aspect HasNextMonitorAspectOptimized {
 					monitor = new HasNextMonitor_1();
 					m.put(i, monitor);
 					List<Object> monitors = new ArrayList<>();
-					monitors.add(monitor);
-					
+					monitors.add(monitor);	
+					monitor_trace_map.put(currentStackTrace, monitors);
+					monitor_counter++;
 				}
 			}
 
@@ -272,6 +273,9 @@ public aspect HasNextMonitorAspectOptimized {
 	@SuppressWarnings("rawtypes")
 	pointcut HasNext_hasnext1(Iterator i) : (call(* Iterator.hasNext()) && target(i)) && !within(HasNextMonitor_1) && !within(HasNextMonitorAspectOptimized) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
 	after (Iterator i) : HasNext_hasnext1(i) {
+		
+		has_next_counter++;
+		
 		boolean skipAroundAdvice = false;
 		Object obj = null;
 
@@ -303,6 +307,9 @@ public aspect HasNextMonitorAspectOptimized {
 
 	pointcut HasNext_next1(Iterator i) : (call(* Iterator.next()) && target(i)) && !within(HasNextMonitor_1) && !within(HasNextMonitorAspectOptimized) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
 	before (Iterator i) : HasNext_next1(i) {
+		
+		next_counter++;
+		
 		boolean skipAroundAdvice = false;
 		Object obj = null;
 
