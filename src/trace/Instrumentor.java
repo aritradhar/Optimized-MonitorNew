@@ -84,7 +84,7 @@ public class Instrumentor extends BodyTransformer
 			BatchDriverClass_bloat.methodIDMap.put(methodName, methodID);
 		}
 		
-		//System.out.println(body);
+		System.out.println("Method ID : " + methodID);
 		PatchingChain<Unit> pc =  body.getUnits();
 		Iterator<Unit> it = pc.snapshotIterator();
 		
@@ -96,7 +96,7 @@ public class Instrumentor extends BodyTransformer
 			Stmt stmt = (Stmt) it.next();
 			if(!(stmt instanceof IdentityStmt))
 			{
-				pc.insertBefore(st, stmt);
+				pc.insertAfter(st, stmt);
 				break;
 			}
 		}
