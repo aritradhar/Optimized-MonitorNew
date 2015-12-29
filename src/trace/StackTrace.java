@@ -27,8 +27,6 @@ public class StackTrace {
 		{
 		case 0:
 			id <<= 32;
-			//trace |= id;
-			//trace &= 0xffffffffffffL;
 			break;
 
 		case 1:
@@ -42,7 +40,7 @@ public class StackTrace {
 		}
 		//System.out.printf("0x%08X\n", id);
 		trace |= id;
-		//trace &= 0xffffffffffffL;
+		trace &= 0xffffffffffffL;
 		counter = (counter + 1) % traceLength;
 	}
 	
@@ -52,6 +50,6 @@ public class StackTrace {
 		insertMethodID(0xffL);
 		insertMethodID(0xffL);
 		
-		//System.out.printf("0x%08X", trace);
+		System.out.printf("0x%08X", trace);
 	}
 }
