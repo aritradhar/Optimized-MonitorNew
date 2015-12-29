@@ -19,7 +19,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 
-public aspect HasNextNew {
+public aspect HasNextSingleMonitor {
 
 	public static volatile HashSet<Object> one_state = new HashSet<>();
 	public static volatile HashSet<Object> two_state = new HashSet<>();
@@ -32,7 +32,7 @@ public aspect HasNextNew {
 	public static long overhead = 0;
 	
 	pointcut HasNext_hasnext1(Iterator i) : (call(* Iterator.hasNext()) && target(i)) 
-	&& !within(HasNextNew) && !adviceexecution();
+	&& !within(HasNextSingleMonitor) && !adviceexecution();
 	after (Iterator i) : HasNext_hasnext1(i) 
 	{
 		long start = System.currentTimeMillis();
@@ -69,7 +69,7 @@ public aspect HasNextNew {
 	}
 
 	pointcut HasNext_next1(Iterator i) : (call(* Iterator.next()) && target(i)) 
-	&& !within(HasNextNew) && !adviceexecution();
+	&& !within(HasNextSingleMonitor) && !adviceexecution();
 	before (Iterator i) : HasNext_next1(i) 
 	{
 		long start = System.currentTimeMillis();
@@ -103,7 +103,7 @@ public aspect HasNextNew {
 		}
 	}
 	
-	pointcut UnsafeIterator_exit1() : (call(* System.exit(..))) && !within(HasNextNew) && !adviceexecution();
+	pointcut UnsafeIterator_exit1() : (call(* System.exit(..))) && !within(HasNextSingleMonitor) && !adviceexecution();
 	before () : UnsafeIterator_exit1() 
 	{
 		System.out.println("next : " + next_counter);
