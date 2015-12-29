@@ -8,5 +8,6 @@
 			<attribute name="javadoc_location" value="https://ssebuild.cased.de/nightly/soot/javadoc/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="C:/lib/commons-collections-3.2.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
