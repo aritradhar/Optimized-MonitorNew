@@ -23,7 +23,7 @@ public class BatchDriverClass_bloat
 				//System.out.println( "Dir:" + f.getAbsoluteFile() );
 			}
 			else {
-				String fName = f.getAbsoluteFile().toString().substring(44);
+				String fName = f.getAbsoluteFile().toString().substring(54);
 				if(fName.contains(".class"))
 				{
 					if(fName.contains("CompactArrayInitializer") || fName.contains("ClassHierarchy"))
@@ -53,7 +53,7 @@ public class BatchDriverClass_bloat
 		{
 			String[] ar = {s};
 			System.err.println("Instrumenting : " + s);
-			Options.v().set_soot_classpath("C:\\Users\\Aritra\\workspace\\CGTrace\\bin");				
+			Options.v().set_soot_classpath("bin");				
 			Options.v().set_prepend_classpath(true);
 			Options.v().setPhaseOption("jb", "use-original-names:true");
 			Pack jtp = PackManager.v().getPack("jtp");
