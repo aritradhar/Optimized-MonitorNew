@@ -153,7 +153,7 @@ public aspect HasNextMonitorAspectOriginal {
 	static Map indexing_lock = new HashMap();
 
 	static Map HasNext_i_Map = null;
-	static volatile int monitor_counter = 0, has_next_counter = 0, next_counter = 0;
+	static volatile long monitor_counter = 0, has_next_counter = 0, next_counter = 0, error_counter = 0;
 	
 	pointcut HasNext_create1() : (call(Iterator Collection+.iterator())) && !within(HasNextMonitor_1) && !within(HasNextMonitorAspectOriginal) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
 	after () returning (Iterator i) : HasNext_create1() {
@@ -189,6 +189,7 @@ public aspect HasNextMonitorAspectOriginal {
 		{
 			monitor.create(i);
 			if(monitor.MOP_fail()) {
+				error_counter++;
 				//System.err.println("! hasNext() has not been called" + " before calling next() for an" + " iterator");
 				monitor.reset();
 			}
@@ -221,6 +222,7 @@ public aspect HasNextMonitorAspectOriginal {
 		if(monitor != null) {
 			monitor.hasnext(i);
 			if(monitor.MOP_fail()) {
+				error_counter++;
 				//System.err.println("! hasNext() has not been called" + " before calling next() for an" + " iterator");
 				monitor.reset();
 			}
@@ -256,6 +258,7 @@ public aspect HasNextMonitorAspectOriginal {
 		if(monitor != null) {
 			monitor.next(i);
 			if(monitor.MOP_fail()) {
+				error_counter++;
 				//System.err.println("! hasNext() has not been called" + " before calling next() for an" + " iterator");
 				monitor.reset();
 			}
@@ -273,6 +276,7 @@ public aspect HasNextMonitorAspectOriginal {
 			System.err.println("The number of monitors created are : " + monitor_counter);
 			System.err.println("hasNext counter : " + has_next_counter);
 			System.err.println("next counter : " + next_counter);
+			System.err.println("error counter : " + error_counter);
 		}
 	
 	pointcut mainMethod(): execution (public static void main(String[]));

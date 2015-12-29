@@ -203,7 +203,7 @@ public aspect HasNextMonitorAspectOptimized {
 
 	static volatile Map<Long, List<Object>> monitor_trace_map = new ConcurrentHashMap<>();
 	
-	static volatile int monitor_counter = 0, has_next_counter = 0, next_counter = 0;
+	static volatile long monitor_counter = 0, has_next_counter = 0, next_counter = 0, error_counter = 0;
 
 	pointcut HasNext_create1() : (call(Iterator Collection+.iterator())) && !within(HasNextMonitor_1) && !within(HasNextMonitorAspectOptimized) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
 	@SuppressWarnings("rawtypes")
@@ -264,6 +264,7 @@ public aspect HasNextMonitorAspectOptimized {
 			monitor.create(i);
 			if(monitor.MOP_fail()) {
 				//System.err.println("! hasNext() has not been called" + " before calling next() for an" + " iterator");
+				error_counter++;
 				monitor.reset();
 			}
 
@@ -296,6 +297,7 @@ public aspect HasNextMonitorAspectOptimized {
 		if(monitor != null) {
 			monitor.hasnext(i);
 			if(monitor.MOP_fail()) {
+				error_counter++;
 				//System.err.println("! hasNext() has not been called" + " before calling next() for an" + " iterator");
 				monitor.reset();
 			}
@@ -331,6 +333,7 @@ public aspect HasNextMonitorAspectOptimized {
 		if(monitor != null) {
 			monitor.next(i);
 			if(monitor.MOP_fail()) {
+				error_counter++;
 				//System.err.println("! hasNext() has not been called" + " before calling next() for an" + " iterator");
 				monitor.reset();
 			}
@@ -342,15 +345,16 @@ public aspect HasNextMonitorAspectOptimized {
 	pointcut System_exit(): (call (* System.exit(int)));
 	before(): System_exit(){
 		//System.err.println("About to print the statistics--- \n");
-		System.err.println("The number of monitors created are : " + monitor_counter);
-		System.err.println("HasNext counter : " + has_next_counter);
-		System.err.println("next counter : " + next_counter);
+		//System.err.println("The number of monitors created are : " + monitor_counter);
+		//System.err.println("HasNext counter : " + has_next_counter);
+		//System.err.println("next counter : " + next_counter);
 	}
 
 	void around(): System_exit(){
 		System.err.println("The number of monitors created are : " + monitor_counter);
 		System.err.println("HasNext counter : " + has_next_counter);
 		System.err.println("next counter : " + next_counter);
+		System.err.println("error counter : " + error_counter);
 	}
 
 	pointcut mainMethod(): execution (public static void main(String[]));

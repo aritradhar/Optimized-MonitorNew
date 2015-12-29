@@ -2,3 +2,6 @@
 /trace/
 /HasNextMonitorAspect.class
 /HasNextMonitor_1.class
+/UnsafeIteratorMonitorAspect.class
+/UnsafeIteratorMonitor_1.class
+/UnsafeIteratorMonitorAspectOriginal.class
