@@ -47,7 +47,7 @@ public class BatchDriverClass_bloat
 			System.err.println("Usage: java MainDriver[options] classname");
 			System.exit(0);
 		}*/
-		walk("bin\\EDU");
+		walk("bloat\\EDU");
 
 		for(String s : files)
 		{
