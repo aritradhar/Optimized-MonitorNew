@@ -6,6 +6,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.collections.map.*;
 
+import trace.StackTrace;
+
 import java.lang.ref.WeakReference;
 
 class HasNextMonitor_1 implements Cloneable {
@@ -140,7 +142,7 @@ class HasNextMonitor_1 implements Cloneable {
 		MOP_fail = false;
 	}
 
-	public static double setProbability(long count)
+	public static double getMonitorCreation(long count)
 	{				
 		if(count >= 0 && count < 10){
 			return 1;
@@ -183,8 +185,6 @@ class HasNextMonitor_1 implements Cloneable {
 		}
 
 	}
-
-
 }
 
 public aspect HasNextMonitorAspectOptimized {
@@ -204,9 +204,9 @@ public aspect HasNextMonitorAspectOptimized {
 
 	static Map<Object, Object> HasNext_i_Map = null;
 
-	static ConcurrentHashMap<Object, Long> monitor_trace_map = new ConcurrentHashMap<>();
+	static Map<Long, List<Object>> monitor_trace_map = new ConcurrentHashMap<>();
 
-	pointcut HasNext_create1() : (call(Iterator Collection+.iterator())) && !within(HasNextMonitor_1) && !within(HasNextMonitorAspect) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
+	pointcut HasNext_create1() : (call(Iterator Collection+.iterator())) && !within(HasNextMonitor_1) && !within(HasNextMonitorAspectOptimized) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
 	@SuppressWarnings("rawtypes")
 	after () returning (Iterator i) : HasNext_create1() {
 		boolean skipAroundAdvice = false;
@@ -228,11 +228,33 @@ public aspect HasNextMonitorAspectOptimized {
 
 			monitor = (HasNextMonitor_1) obj;
 			toCreate = (monitor == null);
+			
 			if (toCreate){
-
-				monitor = new HasNextMonitor_1();
-				m.put(i, monitor);
-
+				
+				long currentStackTrace = StackTrace.trace;
+				if(monitor_trace_map.containsKey(currentStackTrace))
+				{
+					List<Object> monitors = monitor_trace_map.get(currentStackTrace);
+					int creationCounter = monitors.size();
+					double monitorCreationProb = HasNextMonitor_1.getMonitorCreation(creationCounter);
+					
+					if(new Random().nextDouble() < monitorCreationProb)
+					{
+						monitor = new HasNextMonitor_1();
+						m.put(i, monitor);
+						monitors.add(monitor);
+						monitor_trace_map.put(currentStackTrace, monitors);
+					}
+				}
+				
+				else
+				{
+					monitor = new HasNextMonitor_1();
+					m.put(i, monitor);
+					List<Object> monitors = new ArrayList<>();
+					monitors.add(monitor);
+					
+				}
 			}
 
 		}
@@ -248,7 +270,7 @@ public aspect HasNextMonitorAspectOptimized {
 	}
 
 	@SuppressWarnings("rawtypes")
-	pointcut HasNext_hasnext1(Iterator i) : (call(* Iterator.hasNext()) && target(i)) && !within(HasNextMonitor_1) && !within(HasNextMonitorAspect) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
+	pointcut HasNext_hasnext1(Iterator i) : (call(* Iterator.hasNext()) && target(i)) && !within(HasNextMonitor_1) && !within(HasNextMonitorAspectOptimized) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
 	after (Iterator i) : HasNext_hasnext1(i) {
 		boolean skipAroundAdvice = false;
 		Object obj = null;
@@ -279,7 +301,7 @@ public aspect HasNextMonitorAspectOptimized {
 
 	}
 
-	pointcut HasNext_next1(Iterator i) : (call(* Iterator.next()) && target(i)) && !within(HasNextMonitor_1) && !within(HasNextMonitorAspect) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
+	pointcut HasNext_next1(Iterator i) : (call(* Iterator.next()) && target(i)) && !within(HasNextMonitor_1) && !within(HasNextMonitorAspectOptimized) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
 	before (Iterator i) : HasNext_next1(i) {
 		boolean skipAroundAdvice = false;
 		Object obj = null;
