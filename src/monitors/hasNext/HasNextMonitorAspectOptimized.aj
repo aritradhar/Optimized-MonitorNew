@@ -1,5 +1,8 @@
 package monitors.hasNext;
 /* Original JavaMOP 2.1 aspect for HasNext property */
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryPoolMXBean;
+import java.lang.management.MemoryUsage;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -354,7 +357,26 @@ public aspect HasNextMonitorAspectOptimized {
 		System.err.println("The number of monitors created are : " + monitor_counter);
 		System.err.println("HasNext counter : " + has_next_counter);
 		System.err.println("next counter : " + next_counter);
-		System.err.println("error counter : " + error_counter);
+		//System.err.println("error counter : " + error_counter);
+		
+		try {
+			String memoryUsage = new String();
+			List<MemoryPoolMXBean> pools = ManagementFactory.getMemoryPoolMXBeans();
+			
+			for (MemoryPoolMXBean pool : pools) 
+			{
+				MemoryUsage peak = pool.getPeakUsage();
+				memoryUsage += String.format("Peak %s memory used: %,d%n", pool.getName(),peak.getUsed());
+				memoryUsage += String.format("Peak %s memory reserved: %,d%n", pool.getName(), peak.getCommitted());
+			}
+
+			System.err.println(memoryUsage);
+
+		} 
+		catch (Throwable t) 
+		{
+			System.err.println("Exception in agent: " + t);
+		}
 	}
 
 	pointcut mainMethod(): execution (public static void main(String[]));
