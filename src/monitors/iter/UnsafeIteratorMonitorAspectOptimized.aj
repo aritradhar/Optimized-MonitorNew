@@ -7,6 +7,8 @@ import java.lang.ref.*;
 
 import org.apache.commons.collections.map.*;
 
+import trace.StackTrace;
+
 class UnsafeIteratorMonitor_1 implements Cloneable {
 	public Object clone() {
 		try {
@@ -187,7 +189,7 @@ class UnsafeIteratorMonitor_1 implements Cloneable {
 	
 }
 
-public aspect UnsafeIteratorMonitorAspectOriginal {
+public aspect UnsafeIteratorMonitorAspectOptimized {
 	@SuppressWarnings("unchecked")
 	static Map<Object, Object> makeMap(Object key){
 		if (key instanceof String) {
@@ -212,7 +214,7 @@ public aspect UnsafeIteratorMonitorAspectOriginal {
 	
 	static volatile long monitor_counter = 0, next_counter = 0, update_counter = 0;
 
-	pointcut UnsafeIterator_create1(Collection c) : (call(Iterator Collection+.iterator()) && target(c)) && !within(UnsafeIteratorMonitor_1) && !within(UnsafeIteratorMonitorAspectOriginal) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
+	pointcut UnsafeIterator_create1(Collection c) : (call(Iterator Collection+.iterator()) && target(c)) && !within(UnsafeIteratorMonitor_1) && !within(UnsafeIteratorMonitorAspectOptimized) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
 	@SuppressWarnings("unchecked")
 	after (Collection c) returning (Iterator i) : UnsafeIterator_create1(c) {
 		boolean skipAroundAdvice = false;
@@ -243,15 +245,40 @@ public aspect UnsafeIteratorMonitorAspectOriginal {
 			if (toCreate){
 				
 				monitor_counter++;
-                monitor = new UnsafeIteratorMonitor_1();
-                m.put(i, monitor);
-
+				//add trace info 
+				long currentStackTrace = StackTrace.trace;
+				if(monitor_trace_map.containsKey(currentStackTrace))
+				{
+					List<Object> monitors = monitor_trace_map.get(currentStackTrace);
+					int creationCounter = monitors.size();
+					double monitorCreationProb = UnsafeIteratorMonitor_1.getMonitorCreation(creationCounter);
+					
+					if(new Random().nextDouble() < monitorCreationProb)
+					{
+						monitor = new UnsafeIteratorMonitor_1();
+						m.put(i, monitor);
+						monitors.add(monitor);
+						monitor_trace_map.put(currentStackTrace, monitors);
+						monitor_counter++;
+					}
+				}
+				
+				else
+				{
+					monitor = new UnsafeIteratorMonitor_1();
+					m.put(i, monitor);
+					List<Object> monitors = new ArrayList<>();
+					monitors.add(monitor);	
+					monitor_trace_map.put(currentStackTrace, monitors);
+					monitor_counter++;
+				}
 		    }
 			if(toCreate) {
 				m = UnsafeIterator_c_Map;
 				if (m == null) m = UnsafeIterator_c_Map = makeMap(c);
 				obj = null;
-				synchronized(UnsafeIterator_c_Map) {
+				synchronized(UnsafeIterator_c_Map) 
+				{
 					obj = m.get(c);
 					List<Object> monitors = (List)obj;
 					if (monitors == null) {
@@ -286,7 +313,7 @@ public aspect UnsafeIteratorMonitorAspectOriginal {
 	}
 	}
 
-	pointcut UnsafeIterator_updatesource1(Collection c) : ((call(* Collection+.remove*(..)) || call(* Collection+.add*(..))) && target(c)) && !within(UnsafeIteratorMonitor_1) && !within(UnsafeIteratorMonitorAspectOriginal) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
+	pointcut UnsafeIterator_updatesource1(Collection c) : ((call(* Collection+.remove*(..)) || call(* Collection+.add*(..))) && target(c)) && !within(UnsafeIteratorMonitor_1) && !within(UnsafeIteratorMonitorAspectOptimized) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
 	after (Collection c) : UnsafeIterator_updatesource1(c) {
 		
 		update_counter++;
@@ -319,7 +346,7 @@ public aspect UnsafeIteratorMonitorAspectOriginal {
 		
     }
 
-	pointcut UnsafeIterator_next1(Iterator i) : (call(* Iterator.next()) && target(i)) && !within(UnsafeIteratorMonitor_1) && !within(UnsafeIteratorMonitorAspectOriginal) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
+	pointcut UnsafeIterator_next1(Iterator i) : (call(* Iterator.next()) && target(i)) && !within(UnsafeIteratorMonitor_1) && !within(UnsafeIteratorMonitorAspectOptimized) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
 	before (Iterator i) : UnsafeIterator_next1(i) {
 		
 		next_counter++;
