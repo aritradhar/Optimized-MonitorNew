@@ -203,12 +203,12 @@ public aspect HasNextMonitorAspectOriginal {
 		if(monitor!=null)
 		{
 			monitor.create(i);
-			if(monitor.MOP_fail()) {
+			if(monitor.MOP_fail()) 
+			{
 				error_counter++;
 				//System.err.println("! hasNext() has not been called" + " before calling next() for an" + " iterator");
 				monitor.reset();
 			}
-
 		}
 	}
 
@@ -220,7 +220,7 @@ public aspect HasNextMonitorAspectOriginal {
 		boolean skipAroundAdvice = false;
 		Object obj = null;
 
-		Map m = HasNext_i_Map;
+		Map<Object, Object> m = HasNext_i_Map;
 
 		if(m == null){
 			synchronized(indexing_lock) {

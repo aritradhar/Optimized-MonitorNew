@@ -15,8 +15,12 @@
 
 package monitors.hasNext;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryPoolMXBean;
+import java.lang.management.MemoryUsage;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 
 
 public aspect HasNextSingleMonitor {
@@ -34,7 +38,7 @@ public aspect HasNextSingleMonitor {
 	public static long overhead = 0;
 
 	pointcut HasNext_hasnext1(Iterator i) : (call(* Iterator.hasNext()) && target(i)) 
-	&& !within(HasNextSingleMonitor) && !adviceexecution();
+	&& !within(HasNextSingleMonitor) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
 	after (Iterator i) : HasNext_hasnext1(i) 
 	{
 		//long start = System.currentTimeMillis();
@@ -90,7 +94,7 @@ public aspect HasNextSingleMonitor {
 	}
 
 	pointcut HasNext_next1(Iterator i) : (call(* Iterator.next()) && target(i)) 
-	&& !within(HasNextSingleMonitor) && !adviceexecution();
+	&& !within(HasNextSingleMonitor) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
 	before (Iterator i) : HasNext_next1(i) 
 	{
 		long start = System.currentTimeMillis();
@@ -158,6 +162,26 @@ public aspect HasNextSingleMonitor {
 		//System.err.println("f1 : " + f1);
 		//System.err.println("f2 : " + f2);
 		//System.err.println("overhead : " + overhead + " ms");
+		try {
+			String memoryUsage = new String();
+			List<MemoryPoolMXBean> pools = ManagementFactory.getMemoryPoolMXBeans();
+			
+			for (MemoryPoolMXBean pool : pools) 
+			{
+				MemoryUsage peak = pool.getPeakUsage();
+				memoryUsage += String.format("Peak %s memory used: %,d%n", pool.getName(),peak.getUsed());
+				memoryUsage += String.format("Peak %s memory reserved: %,d%n", pool.getName(), peak.getCommitted());
+			}
+
+			System.err.println(memoryUsage);
+
+		} 
+		catch (Throwable t) 
+		{
+			System.err.println("Exception in agent: " + t);
+		}
+		
+		
 	}
 
 
