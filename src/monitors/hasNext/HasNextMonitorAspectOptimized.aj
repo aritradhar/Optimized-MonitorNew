@@ -142,7 +142,7 @@ class HasNextMonitor_1 implements Cloneable {
 		MOP_fail = false;
 	}
 
-	public static double getMonitorCreation(long count)
+	synchronized public static double getMonitorCreation(long count)
 	{				
 		if(count >= 0 && count < 10){
 			return 1;
