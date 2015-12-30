@@ -1,10 +1,8 @@
-package monitors.iter;
+package monitors.unsafeIter;
 /* Original JavaMOP 2.1 aspect for UnsafeIterator property*/
-import java.io.*;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.lang.ref.*;
-
 import org.apache.commons.collections.map.*;
 
 import trace.StackTrace;
@@ -29,7 +27,7 @@ class UnsafeIteratorMonitor_1 implements Cloneable {
 		event = -1;
 
 	}
-	synchronized public final void create(Collection c,Iterator i) {
+	synchronized public final void create(Collection c, Iterator i) {
 		event = 1;
 
 		switch(state) {
