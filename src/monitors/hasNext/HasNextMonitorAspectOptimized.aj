@@ -144,44 +144,44 @@ class HasNextMonitor_1 implements Cloneable {
 
 	synchronized public static double getMonitorCreation(long count)
 	{				
-		if(count >= 0 && count < 10){
+		if(count >= 0 && count < 500){
 			return 1;
 		}
 
-		else if(count >= 10 && count < 50){
+		else if(count >= 500 && count < 2000){
 			return 0.5;
 		}
 
-		else if(count >= 50 && count < 100){
+		else if(count >= 2000 && count < 5000){
 			return 0.25;
 		}
 
-		else if(count >= 100 && count < 500){
+		else if(count >= 5000 && count < 200000){
 			return 0.125;
 		}
 
-		else if(count >= 500 && count < 1000){
+		else if(count >= 200000 && count < 350000){
 			return 0.0625;
 		}
 
-		else if(count >= 1000 && count < 2000){
+		else if(count >= 350000 && count < 800000){
 			return 0.03125;
 		}
 
-		else if(count >= 2000 && count < 4000){
+		else if(count >= 800000 && count < 1200000){
 			return 0.015625;
 		}
 
-		else if(count >= 4000 && count < 7000){
+		else if(count >= 1200000 && count < 1800000){
 			return 0.0078125;
 		}
 
-		else if(count >= 7000 && count < 10000){
+		else if(count >= 1800000 && count < 2000000){
 			return 0.00390625;
 		}
 
 		else{
-			return 0;
+			return 0.001953125;
 		}
 
 	}
@@ -206,11 +206,16 @@ public aspect HasNextMonitorAspectOptimized {
 
 	static volatile Map<Long, List<Object>> monitor_trace_map = new ConcurrentHashMap<>();
 	
-	static volatile long monitor_counter = 0, has_next_counter = 0, next_counter = 0, error_counter = 0;
+	static volatile long monitor_counter = 0, has_next_counter = 0, next_counter = 0, error_counter = 0, creation_logged = 0;
+	
+	static volatile long prob_created = 0;
 
 	pointcut HasNext_create1() : (call(Iterator Collection+.iterator())) && !within(HasNextMonitor_1) && !within(HasNextMonitorAspectOptimized) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
 	@SuppressWarnings("rawtypes")
 	after () returning (Iterator i) : HasNext_create1() {
+		
+		creation_logged++;
+		
 		boolean skipAroundAdvice = false;
 		Object obj = null;
 
@@ -242,6 +247,7 @@ public aspect HasNextMonitorAspectOptimized {
 					
 					if(new Random().nextDouble() < monitorCreationProb)
 					{
+						prob_created++;
 						monitor = new HasNextMonitor_1();
 						m.put(i, monitor);
 						monitors.add(monitor);
@@ -357,7 +363,11 @@ public aspect HasNextMonitorAspectOptimized {
 		System.err.println("The number of monitors created are : " + monitor_counter);
 		System.err.println("HasNext counter : " + has_next_counter);
 		System.err.println("next counter : " + next_counter);
-		//System.err.println("error counter : " + error_counter);
+		System.err.println("error counter : " + error_counter);
+		System.err.println("---------------------------------------------------------");
+		System.err.println("prob_created counter : " + prob_created);
+		System.err.println("Total contexts : " + monitor_trace_map.size());
+		System.err.println("Creation logged : " + creation_logged);
 		
 		try {
 			String memoryUsage = new String();
