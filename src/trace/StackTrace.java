@@ -21,7 +21,7 @@ public class StackTrace {
 	public static int counter = 0;
 	public static int traceLength = 3;
 	
-	public static void insertMethodID(long id)
+	synchronized public static void insertMethodID(long id)
 	{
 		switch (counter) 
 		{
@@ -44,12 +44,12 @@ public class StackTrace {
 		counter = (counter + 1) % traceLength;
 	}
 	
-	public static void main(String[] args) {
-		
-		insertMethodID(0xFFL);
-		insertMethodID(0xffL);
-		insertMethodID(0xffL);
-		
-		System.out.printf("0x%08X", trace);
-	}
+//	public static void main(String[] args) {
+//		
+//		insertMethodID(0xFFL);
+//		insertMethodID(0xffL);
+//		insertMethodID(0xffL);
+//		
+//		System.out.printf("0x%08X", trace);
+//	}
 }

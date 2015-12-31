@@ -1,7 +1,7 @@
+package monitors.iterOriginal;
+
 /* Original JavaMOP 2.1 aspect for UnsafeIterator property*/
-import java.io.*;
 import java.util.*;
-import java.lang.ref.*;
 import org.apache.commons.collections.map.*;
 
 class UnsafeIteratorMonitor_1 implements Cloneable {

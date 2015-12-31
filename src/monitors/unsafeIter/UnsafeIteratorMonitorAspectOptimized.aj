@@ -1,16 +1,20 @@
 package monitors.unsafeIter;
 /* Original JavaMOP 2.1 aspect for UnsafeIterator property*/
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryPoolMXBean;
+import java.lang.management.MemoryUsage;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+
 import org.apache.commons.collections.map.*;
 
 import trace.StackTrace;
 
-class UnsafeIteratorMonitor_1 implements Cloneable {
+class UnsafeIteratorMonitor implements Cloneable {
 	public Object clone() {
 		try {
-			UnsafeIteratorMonitor_1 ret = (UnsafeIteratorMonitor_1) super.clone();
+			UnsafeIteratorMonitor ret = (UnsafeIteratorMonitor) super.clone();
 			return ret;
 		}
 		catch (CloneNotSupportedException e) {
@@ -22,7 +26,7 @@ class UnsafeIteratorMonitor_1 implements Cloneable {
 
 	boolean MOP_match = false;
 
-	public UnsafeIteratorMonitor_1 () {
+	public UnsafeIteratorMonitor () {
 		state = 0;
 		event = -1;
 
@@ -31,32 +35,32 @@ class UnsafeIteratorMonitor_1 implements Cloneable {
 		event = 1;
 
 		switch(state) {
-			case 0:
+		case 0:
 			switch(event) {
-				case 1 : state = 1; break;
-				default : state = -1; break;
+			case 1 : state = 1; break;
+			default : state = -1; break;
 			}
 			break;
-			case 1:
+		case 1:
 			switch(event) {
-				case 2 : state = 2; break;
-				case 3 : state = 1; break;
-				default : state = -1; break;
+			case 2 : state = 2; break;
+			case 3 : state = 1; break;
+			default : state = -1; break;
 			}
 			break;
-			case 2:
+		case 2:
 			switch(event) {
-				case 2 : state = 2; break;
-				case 3 : state = 3; break;
-				default : state = -1; break;
+			case 2 : state = 2; break;
+			case 3 : state = 3; break;
+			default : state = -1; break;
 			}
 			break;
-			case 3:
+		case 3:
 			switch(event) {
-				default : state = -1; break;
+			default : state = -1; break;
 			}
 			break;
-			default : state = -1;
+		default : state = -1;
 		}
 
 		MOP_match = state == 3;
@@ -65,32 +69,32 @@ class UnsafeIteratorMonitor_1 implements Cloneable {
 		event = 2;
 
 		switch(state) {
-			case 0:
+		case 0:
 			switch(event) {
-				case 1 : state = 1; break;
-				default : state = -1; break;
+			case 1 : state = 1; break;
+			default : state = -1; break;
 			}
 			break;
-			case 1:
+		case 1:
 			switch(event) {
-				case 2 : state = 2; break;
-				case 3 : state = 1; break;
-				default : state = -1; break;
+			case 2 : state = 2; break;
+			case 3 : state = 1; break;
+			default : state = -1; break;
 			}
 			break;
-			case 2:
+		case 2:
 			switch(event) {
-				case 2 : state = 2; break;
-				case 3 : state = 3; break;
-				default : state = -1; break;
+			case 2 : state = 2; break;
+			case 3 : state = 3; break;
+			default : state = -1; break;
 			}
 			break;
-			case 3:
+		case 3:
 			switch(event) {
-				default : state = -1; break;
+			default : state = -1; break;
 			}
 			break;
-			default : state = -1;
+		default : state = -1;
 		}
 
 		MOP_match = state == 3;
@@ -99,48 +103,48 @@ class UnsafeIteratorMonitor_1 implements Cloneable {
 		event = 3;
 
 		switch(state) {
-			case 0:
+		case 0:
 			switch(event) {
-				case 1 : state = 1; break;
-				default : state = -1; break;
+			case 1 : state = 1; break;
+			default : state = -1; break;
 			}
 			break;
-			case 1:
+		case 1:
 			switch(event) {
-				case 2 : state = 2; break;
-				case 3 : state = 1; break;
-				default : state = -1; break;
+			case 2 : state = 2; break;
+			case 3 : state = 1; break;
+			default : state = -1; break;
 			}
 			break;
-			case 2:
+		case 2:
 			switch(event) {
-				case 2 : state = 2; break;
-				case 3 : state = 3; break;
-				default : state = -1; break;
+			case 2 : state = 2; break;
+			case 3 : state = 3; break;
+			default : state = -1; break;
 			}
 			break;
-			case 3:
+		case 3:
 			switch(event) {
-				default : state = -1; break;
+			default : state = -1; break;
 			}
 			break;
-			default : state = -1;
+		default : state = -1;
 		}
 
 		MOP_match = state == 3;
 	}
-	
+
 	synchronized public final boolean MOP_match() {
 		return MOP_match;
 	}
-	
+
 	synchronized public final void reset() {
 		state = 0;
 		event = -1;
 
 		MOP_match = false;
 	}
-	
+
 	synchronized public static double getMonitorCreation(long count)
 	{				
 		if(count >= 0 && count < 10){
@@ -184,7 +188,7 @@ class UnsafeIteratorMonitor_1 implements Cloneable {
 		}
 
 	}
-	
+
 }
 
 public aspect UnsafeIteratorMonitorAspectOptimized {
@@ -207,9 +211,9 @@ public aspect UnsafeIteratorMonitorAspectOptimized {
 	static Map<Object, Object> UnsafeIterator_i_Map = null;
 
 	static long maxTimeUpdate = 0;
-	
+
 	static volatile Map<Long, List<Object>> monitor_trace_map = new ConcurrentHashMap<>();
-	
+
 	static volatile long monitor_counter = 0, next_counter = 0, update_counter = 0;
 
 	pointcut UnsafeIterator_create1(Collection c) : (call(Iterator Collection+.iterator()) && target(c)) && !within(UnsafeIteratorMonitor_1) && !within(UnsafeIteratorMonitorAspectOptimized) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
@@ -218,9 +222,9 @@ public aspect UnsafeIteratorMonitorAspectOptimized {
 		boolean skipAroundAdvice = false;
 		Object obj = null;
 
-        UnsafeIteratorMonitor_1 monitor = null;
+		UnsafeIteratorMonitor monitor = null;
 		boolean toCreate = false;
-                
+
 		Map<Object, Object> m = UnsafeIterator_c_i_Map;
 		if(m == null){
 			synchronized(indexing_lock) {
@@ -238,39 +242,43 @@ public aspect UnsafeIteratorMonitorAspectOptimized {
 			m = (Map<Object, Object>)obj;
 			obj = m.get(i);
 
-			monitor = (UnsafeIteratorMonitor_1) obj;
+			monitor = (UnsafeIteratorMonitor) obj;
 			toCreate = (monitor == null);
-			if (toCreate){
-				
-				monitor_counter++;
+			if (toCreate)
+			{
 				//add trace info 
 				long currentStackTrace = StackTrace.trace;
+
 				if(monitor_trace_map.containsKey(currentStackTrace))
 				{
 					List<Object> monitors = monitor_trace_map.get(currentStackTrace);
 					int creationCounter = monitors.size();
-					double monitorCreationProb = UnsafeIteratorMonitor_1.getMonitorCreation(creationCounter);
-					
+					double monitorCreationProb = UnsafeIteratorMonitor.getMonitorCreation(creationCounter);
+
 					if(new Random().nextDouble() < monitorCreationProb)
 					{
-						monitor = new UnsafeIteratorMonitor_1();
+						monitor_counter++;
+						monitor = new UnsafeIteratorMonitor();
 						m.put(i, monitor);
 						monitors.add(monitor);
 						monitor_trace_map.put(currentStackTrace, monitors);
 						monitor_counter++;
 					}
+					else
+						return;
 				}
-				
+
 				else
 				{
-					monitor = new UnsafeIteratorMonitor_1();
+					monitor_counter++;
+					monitor = new UnsafeIteratorMonitor();
 					m.put(i, monitor);
 					List<Object> monitors = new ArrayList<>();
 					monitors.add(monitor);	
 					monitor_trace_map.put(currentStackTrace, monitors);
 					monitor_counter++;
 				}
-		    }
+			}
 			if(toCreate) {
 				m = UnsafeIterator_c_Map;
 				if (m == null) m = UnsafeIterator_c_Map = makeMap(c);
@@ -283,7 +291,7 @@ public aspect UnsafeIteratorMonitorAspectOptimized {
 						monitors = makeList();
 						m.put(c, monitors);
 					}
-                    monitors.add(monitor);
+					monitors.add(monitor);
 				}//end of adding
 
 				m = UnsafeIterator_i_Map;
@@ -296,65 +304,69 @@ public aspect UnsafeIteratorMonitorAspectOptimized {
 						monitors = makeList();
 						m.put(i, monitors);
 					}
-				monitors.add(monitor);
+					monitors.add(monitor);
 				}//end of adding
 			}
 
-		{
-			monitor.create(c,i);
-			if(monitor.MOP_match()) {
-				System.out.println("improper iterator usage");
+			if(monitor != null)
+			{
+				monitor.create(c,i);
+				if(monitor.MOP_match()) {
+					System.out.println("improper iterator usage");
+				}
+
 			}
 
 		}
-
-	}
 	}
 
 	pointcut UnsafeIterator_updatesource1(Collection c) : ((call(* Collection+.remove*(..)) || call(* Collection+.add*(..))) && target(c)) && !within(UnsafeIteratorMonitor_1) && !within(UnsafeIteratorMonitorAspectOptimized) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
 	after (Collection c) : UnsafeIterator_updatesource1(c) {
-		
+
 		update_counter++;
 		boolean skipAroundAdvice = false;
 		Object obj = null;
-        Map<Object, Object> m = UnsafeIterator_c_Map;
-       
-        if(m == null){
-			     synchronized(indexing_lock) {
-				  m = UnsafeIterator_c_Map;
-				  if(m == null) m = UnsafeIterator_c_Map = makeMap(c);
-			                                 }
-		                      }
+		Map<Object, Object> m = UnsafeIterator_c_Map;
 
-		             synchronized(UnsafeIterator_c_Map) {
-			                   obj = m.get(c);
+		if(m == null){
+			synchronized(indexing_lock) {
+				m = UnsafeIterator_c_Map;
+				if(m == null) m = UnsafeIterator_c_Map = makeMap(c);
+			}
+		}
 
-		                                      }
+		synchronized(UnsafeIterator_c_Map) {
+			obj = m.get(c);
+
+		}
 		if (obj != null) {
 			synchronized(obj) {
-				for(UnsafeIteratorMonitor_1 monitor : (List<UnsafeIteratorMonitor_1>)obj) {
-					monitor.updatesource(c);
-					if(monitor.MOP_match()) {
-						System.err.println("improper iterator usage");
+				for(UnsafeIteratorMonitor monitor : (List<UnsafeIteratorMonitor>)obj) {
+					if(monitor != null)
+					{
+						monitor.updatesource(c);
+						if(monitor.MOP_match()) {
+							System.err.println("improper iterator usage");
+						}
 					}
 
 				}
 			}
 		}
-		
-    }
+
+	}
 
 	pointcut UnsafeIterator_next1(Iterator i) : (call(* Iterator.next()) && target(i)) && !within(UnsafeIteratorMonitor_1) && !within(UnsafeIteratorMonitorAspectOptimized) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
 	before (Iterator i) : UnsafeIterator_next1(i) {
-		
+
 		next_counter++;
-		
+
 		boolean skipAroundAdvice = false;
 		Object obj = null;
 
 		Map<Object, Object> m = UnsafeIterator_i_Map;
 
-             if(m == null){
+		if(m == null){
 			synchronized(indexing_lock) {
 				m = UnsafeIterator_i_Map;
 				if(m == null) m = UnsafeIterator_i_Map = makeMap(i);
@@ -367,16 +379,19 @@ public aspect UnsafeIteratorMonitorAspectOptimized {
 		}
 		if (obj != null) {
 			synchronized(obj) {
-				for(UnsafeIteratorMonitor_1 monitor : (List<UnsafeIteratorMonitor_1>)obj) {
-					monitor.next(i);
-					if(monitor.MOP_match()) {
-						System.out.println("improper iterator usage");
-					}
+				for(UnsafeIteratorMonitor monitor : (List<UnsafeIteratorMonitor>)obj) {
+					if(monitor != null)
+					{
+						monitor.next(i);
+						if(monitor.MOP_match()) {
+							System.out.println("improper iterator usage");
+						}
+					}	
 
 				}
 			}
 		}
-  
+
 
 	}
 	pointcut System_exit(): (call (* System.exit(int)));
@@ -389,15 +404,37 @@ public aspect UnsafeIteratorMonitorAspectOptimized {
 		System.err.println("Total monitors : " + monitor_counter);
 		System.err.println("next counter : " + next_counter);
 		System.err.println("update counter : " + update_counter);
+		
+		//memory profiling
+		
+		try {
+			String memoryUsage = new String();
+			List<MemoryPoolMXBean> pools = ManagementFactory.getMemoryPoolMXBeans();
+			
+			for (MemoryPoolMXBean pool : pools) 
+			{
+				MemoryUsage peak = pool.getPeakUsage();
+				memoryUsage += String.format("Peak %s memory used: %,d%n", pool.getName(),peak.getUsed());
+				memoryUsage += String.format("Peak %s memory reserved: %,d%n", pool.getName(), peak.getCommitted());
+			}
+
+			System.err.println(memoryUsage);
+
+		} 
+		catch (Throwable t) 
+		{
+			System.err.println("Exception in agent: " + t);
+		}
+		
 	}
-	
+
 	pointcut mainMethod(): execution (public static void main(String[]));
-	
+
 	before(): mainMethod(){
-						
+
 		UnsafeIterator_i_Map = null;
 		UnsafeIterator_c_i_Map = null;
 		UnsafeIterator_c_Map = null;
 	}
 
-	}
+}
