@@ -144,19 +144,19 @@ class HasNextMonitor_1 implements Cloneable {
 
 	synchronized public static double getMonitorCreation(long count)
 	{				
-		if(count >= 0 && count < 500){
+		if(count >= 0 && count < 1000){
 			return 1;
 		}
 
-		else if(count >= 500 && count < 2000){
+		else if(count >= 1000 && count < 5000){
 			return 0.5;
 		}
 
-		else if(count >= 2000 && count < 5000){
+		else if(count >= 5000 && count < 10000){
 			return 0.25;
 		}
 
-		else if(count >= 5000 && count < 200000){
+		else if(count >= 10000 && count < 200000){
 			return 0.125;
 		}
 
@@ -207,6 +207,8 @@ public aspect HasNextMonitorAspectOptimized {
 	static volatile Map<Long, List<Object>> monitor_trace_map = new ConcurrentHashMap<>();
 	
 	static volatile long monitor_counter = 0, has_next_counter = 0, next_counter = 0, error_counter = 0, creation_logged = 0;
+	
+	static volatile Set<Object> errorContext = new HashSet<>();
 	
 	static volatile long prob_created = 0;
 
@@ -273,6 +275,7 @@ public aspect HasNextMonitorAspectOptimized {
 			monitor.create(i);
 			if(monitor.MOP_fail()) {
 				//System.err.println("! hasNext() has not been called" + " before calling next() for an" + " iterator");
+				errorContext.add(monitor_trace_map.get(m.get(i)));
 				error_counter++;
 				monitor.reset();
 			}
@@ -369,6 +372,7 @@ public aspect HasNextMonitorAspectOptimized {
 		System.err.println("Total contexts : " + monitor_trace_map.size());
 		System.err.println("Creation logged : " + creation_logged);
 		
+		/*
 		try {
 			String memoryUsage = new String();
 			List<MemoryPoolMXBean> pools = ManagementFactory.getMemoryPoolMXBeans();
@@ -386,7 +390,7 @@ public aspect HasNextMonitorAspectOptimized {
 		catch (Throwable t) 
 		{
 			System.err.println("Exception in agent: " + t);
-		}
+		}*/
 	}
 
 	pointcut mainMethod(): execution (public static void main(String[]));

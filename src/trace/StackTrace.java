@@ -44,12 +44,21 @@ public class StackTrace {
 		counter = (counter + 1) % traceLength;
 	}
 	
-//	public static void main(String[] args) {
-//		
-//		insertMethodID(0xFFL);
-//		insertMethodID(0xffL);
-//		insertMethodID(0xffL);
-//		
-//		System.out.printf("0x%08X", trace);
-//	}
+	synchronized public static void insertMethodID1(long id)
+	{
+		trace = trace << 16;
+		trace &= 0xffffffffffffL;
+		trace |= id;
+		counter = (counter + 1) % traceLength;
+	}
+	
+	public static void main(String[] args) {
+		
+		insertMethodID1(0xFFFFL);
+		insertMethodID1(0xABEEL);
+		insertMethodID1(0x1199L);
+		insertMethodID1(0x0001L);
+		
+		System.out.printf("0x%08X", trace);
+	}
 }

@@ -147,46 +147,45 @@ class UnsafeIteratorMonitor implements Cloneable {
 
 	synchronized public static double getMonitorCreation(long count)
 	{				
-		if(count >= 0 && count < 10){
+		if(count >= 0 && count < 1000){
 			return 1;
 		}
 
-		else if(count >= 10 && count < 50){
+		else if(count >= 1000 && count < 5000){
 			return 0.5;
 		}
 
-		else if(count >= 50 && count < 100){
+		else if(count >= 5000 && count < 10000){
 			return 0.25;
 		}
 
-		else if(count >= 100 && count < 500){
+		else if(count >= 10000 && count < 200000){
 			return 0.125;
 		}
 
-		else if(count >= 500 && count < 1000){
+		else if(count >= 200000 && count < 350000){
 			return 0.0625;
 		}
 
-		else if(count >= 1000 && count < 2000){
+		else if(count >= 350000 && count < 800000){
 			return 0.03125;
 		}
 
-		else if(count >= 2000 && count < 4000){
+		else if(count >= 800000 && count < 1200000){
 			return 0.015625;
 		}
 
-		else if(count >= 4000 && count < 7000){
+		else if(count >= 1200000 && count < 1800000){
 			return 0.0078125;
 		}
 
-		else if(count >= 7000 && count < 10000){
+		else if(count >= 1800000 && count < 2000000){
 			return 0.00390625;
 		}
 
 		else{
-			return 0;
+			return 0.001953125;
 		}
-
 	}
 
 }
@@ -214,9 +213,9 @@ public aspect UnsafeIteratorMonitorAspectOptimized {
 
 	static volatile Map<Long, List<Object>> monitor_trace_map = new ConcurrentHashMap<>();
 
-	static volatile long monitor_counter = 0, next_counter = 0, update_counter = 0;
+	static volatile long monitor_counter = 0, next_counter = 0, update_counter = 0, error_counter = 0;
 
-	pointcut UnsafeIterator_create1(Collection c) : (call(Iterator Collection+.iterator()) && target(c)) && !within(UnsafeIteratorMonitor_1) && !within(UnsafeIteratorMonitorAspectOptimized) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
+	pointcut UnsafeIterator_create1(Collection c) : (call(Iterator Collection+.iterator()) && target(c)) && !within(UnsafeIteratorMonitor) && !within(UnsafeIteratorMonitorAspectOptimized) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
 	@SuppressWarnings("unchecked")
 	after (Collection c) returning (Iterator i) : UnsafeIterator_create1(c) {
 		boolean skipAroundAdvice = false;
@@ -312,6 +311,7 @@ public aspect UnsafeIteratorMonitorAspectOptimized {
 			{
 				monitor.create(c,i);
 				if(monitor.MOP_match()) {
+					error_counter++;
 					System.out.println("improper iterator usage");
 				}
 
@@ -320,7 +320,7 @@ public aspect UnsafeIteratorMonitorAspectOptimized {
 		}
 	}
 
-	pointcut UnsafeIterator_updatesource1(Collection c) : ((call(* Collection+.remove*(..)) || call(* Collection+.add*(..))) && target(c)) && !within(UnsafeIteratorMonitor_1) && !within(UnsafeIteratorMonitorAspectOptimized) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
+	pointcut UnsafeIterator_updatesource1(Collection c) : ((call(* Collection+.remove*(..)) || call(* Collection+.add*(..))) && target(c)) && !within(UnsafeIteratorMonitor) && !within(UnsafeIteratorMonitorAspectOptimized) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
 	after (Collection c) : UnsafeIterator_updatesource1(c) {
 
 		update_counter++;
@@ -346,6 +346,7 @@ public aspect UnsafeIteratorMonitorAspectOptimized {
 					{
 						monitor.updatesource(c);
 						if(monitor.MOP_match()) {
+							error_counter++;
 							System.err.println("improper iterator usage");
 						}
 					}
@@ -356,7 +357,7 @@ public aspect UnsafeIteratorMonitorAspectOptimized {
 
 	}
 
-	pointcut UnsafeIterator_next1(Iterator i) : (call(* Iterator.next()) && target(i)) && !within(UnsafeIteratorMonitor_1) && !within(UnsafeIteratorMonitorAspectOptimized) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
+	pointcut UnsafeIterator_next1(Iterator i) : (call(* Iterator.next()) && target(i)) && !within(UnsafeIteratorMonitor) && !within(UnsafeIteratorMonitorAspectOptimized) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
 	before (Iterator i) : UnsafeIterator_next1(i) {
 
 		next_counter++;
@@ -384,6 +385,7 @@ public aspect UnsafeIteratorMonitorAspectOptimized {
 					{
 						monitor.next(i);
 						if(monitor.MOP_match()) {
+							error_counter++;
 							System.out.println("improper iterator usage");
 						}
 					}	
@@ -404,7 +406,7 @@ public aspect UnsafeIteratorMonitorAspectOptimized {
 		System.err.println("Total monitors : " + monitor_counter);
 		System.err.println("next counter : " + next_counter);
 		System.err.println("update counter : " + update_counter);
-		
+		System.err.println("error counter : " + error_counter);
 		//memory profiling
 		
 		try {

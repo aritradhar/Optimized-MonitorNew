@@ -157,7 +157,7 @@ public aspect UnsafeIteratorMonitorAspectOriginal {
 
 	static long maxTimeUpdate = 0;
 	
-	static volatile long monitor_counter = 0, next_counter = 0, update_counter = 0;
+	static volatile long monitor_counter = 0, next_counter = 0, update_counter = 0, error_counter = 0;
 
 	pointcut UnsafeIterator_create1(Collection c) : (call(Iterator Collection+.iterator()) && target(c)) && !within(UnsafeIteratorMonitor_1) && !within(UnsafeIteratorMonitorAspectOriginal) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
 	after (Collection c) returning (Iterator i) : UnsafeIterator_create1(c) {
@@ -224,6 +224,7 @@ public aspect UnsafeIteratorMonitorAspectOriginal {
 		{
 			monitor.create(c,i);
 			if(monitor.MOP_match()) {
+				error_counter++;
 				System.out.println("improper iterator usage");
 			}
 
@@ -256,6 +257,7 @@ public aspect UnsafeIteratorMonitorAspectOriginal {
 				for(UnsafeIteratorMonitor_1 monitor : (List<UnsafeIteratorMonitor_1>)obj) {
 					monitor.updatesource(c);
 					if(monitor.MOP_match()) {
+						error_counter++;
 						System.err.println("improper iterator usage");
 					}
 
@@ -291,6 +293,7 @@ public aspect UnsafeIteratorMonitorAspectOriginal {
 				for(UnsafeIteratorMonitor_1 monitor : (List<UnsafeIteratorMonitor_1>)obj) {
 					monitor.next(i);
 					if(monitor.MOP_match()) {
+						error_counter++;
 						System.out.println("improper iterator usage");
 					}
 
@@ -303,13 +306,14 @@ public aspect UnsafeIteratorMonitorAspectOriginal {
 	pointcut System_exit(): (call (* System.exit(int)));
 
 	before(): System_exit(){
-		System.err.println("About to print the statistics--- \n");
+		//System.err.println("About to print the statistics--- \n");
 	}
 
 	void around(): System_exit(){
-		System.out.println("Total monitors : " + monitor_counter);
-		System.out.println("next counter : " + next_counter);
-		System.out.println("update counter : " + update_counter);
+		System.err.println("Total monitors : " + monitor_counter);
+		System.err.println("next counter : " + next_counter);
+		System.err.println("update counter : " + update_counter);
+		System.err.println("error counter : " + error_counter);
 	}
 	
 	pointcut mainMethod(): execution (public static void main(String[]));
