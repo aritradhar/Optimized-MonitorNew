@@ -152,6 +152,49 @@ class SafeFileWriterMonitor_1 implements Cloneable {
 		MOP_fail = false;
 		MOP_match = false;
 	}
+	
+	synchronized public static double getMonitorCreation(long count)
+	{				
+		if(count >= 0 && count < 1000){
+			return 1;
+		}
+
+		else if(count >= 1000 && count < 5000){
+			return 0.5;
+		}
+
+		else if(count >= 5000 && count < 10000){
+			return 0.25;
+		}
+
+		else if(count >= 10000 && count < 200000){
+			return 0.125;
+		}
+
+		else if(count >= 200000 && count < 350000){
+			return 0.0625;
+		}
+
+		else if(count >= 350000 && count < 800000){
+			return 0.03125;
+		}
+
+		else if(count >= 800000 && count < 1200000){
+			return 0.015625;
+		}
+
+		else if(count >= 1200000 && count < 1800000){
+			return 0.0078125;
+		}
+
+		else if(count >= 1800000 && count < 2000000){
+			return 0.00390625;
+		}
+
+		else{
+			return 0.001953125;
+		}
+	}
 }
 
 public aspect SafeFileWriterMonitorAspect {
