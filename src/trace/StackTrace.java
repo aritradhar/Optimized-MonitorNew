@@ -20,9 +20,13 @@ public class StackTrace {
 	public static long trace;
 	public static int counter = 0;
 	public static int traceLength = 3;
+	public static long lastId = 0;
 	
 	synchronized public static void insertMethodID(long id)
 	{
+		if(id == lastId)
+			return;
+		
 		switch (counter) 
 		{
 		case 0:
@@ -42,7 +46,11 @@ public class StackTrace {
 		trace |= id;
 		trace &= 0xffffffffffffL;
 		counter = (counter + 1) % traceLength;
+		//System.err.println(id);
+		
+		lastId = id;
 	}
+	
 	
 	synchronized public static void insertMethodID1(long id)
 	{
@@ -61,4 +69,5 @@ public class StackTrace {
 		
 		System.out.printf("0x%08X", trace);
 	}
+	
 }

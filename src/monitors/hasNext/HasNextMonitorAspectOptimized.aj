@@ -208,11 +208,13 @@ public aspect HasNextMonitorAspectOptimized {
 	
 	static volatile long monitor_counter = 0, has_next_counter = 0, next_counter = 0, error_counter = 0, creation_logged = 0;
 	
+	static volatile Map<Object, Object> iterContextMap = new HashMap<>();
+	
 	static volatile Set<Object> errorContext = new HashSet<>();
 	
 	static volatile long prob_created = 0;
 
-	pointcut HasNext_create1() : (call(Iterator Collection+.iterator())) && !within(HasNextMonitor_1) && !within(HasNextMonitorAspectOptimized) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
+	pointcut HasNext_create1() : (call(Iterator Collection+.iterator())) && !within(HasNextMonitor_1) && !within(HasNextMonitorAspectOptimized)  && !within(trace.StackTrace) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
 	@SuppressWarnings("rawtypes")
 	after () returning (Iterator i) : HasNext_create1() {
 		
@@ -254,6 +256,7 @@ public aspect HasNextMonitorAspectOptimized {
 						m.put(i, monitor);
 						monitors.add(monitor);
 						monitor_trace_map.put(currentStackTrace, monitors);
+						iterContextMap.put(i, currentStackTrace);
 						monitor_counter++;
 					}
 				}
@@ -265,6 +268,7 @@ public aspect HasNextMonitorAspectOptimized {
 					List<Object> monitors = new ArrayList<>();
 					monitors.add(monitor);	
 					monitor_trace_map.put(currentStackTrace, monitors);
+					iterContextMap.put(i, currentStackTrace);
 					monitor_counter++;
 				}
 			}
@@ -275,7 +279,7 @@ public aspect HasNextMonitorAspectOptimized {
 			monitor.create(i);
 			if(monitor.MOP_fail()) {
 				//System.err.println("! hasNext() has not been called" + " before calling next() for an" + " iterator");
-				errorContext.add(monitor_trace_map.get(m.get(i)));
+				errorContext.add(iterContextMap.get(i));
 				error_counter++;
 				monitor.reset();
 			}
@@ -284,7 +288,7 @@ public aspect HasNextMonitorAspectOptimized {
 	}
 
 	@SuppressWarnings("rawtypes")
-	pointcut HasNext_hasnext1(Iterator i) : (call(* Iterator.hasNext()) && target(i)) && !within(HasNextMonitor_1) && !within(HasNextMonitorAspectOptimized) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
+	pointcut HasNext_hasnext1(Iterator i) : (call(* Iterator.hasNext()) && target(i)) && !within(trace.StackTrace) && !within(HasNextMonitor_1) && !within(HasNextMonitorAspectOptimized) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
 	after (Iterator i) : HasNext_hasnext1(i) {
 		
 		has_next_counter++;
@@ -311,6 +315,7 @@ public aspect HasNextMonitorAspectOptimized {
 			if(monitor.MOP_fail()) {
 				error_counter++;
 				//System.err.println("! hasNext() has not been called" + " before calling next() for an" + " iterator");
+				errorContext.add(iterContextMap.get(i));
 				monitor.reset();
 			}
 
@@ -319,7 +324,7 @@ public aspect HasNextMonitorAspectOptimized {
 
 	}
 
-	pointcut HasNext_next1(Iterator i) : (call(* Iterator.next()) && target(i)) && !within(HasNextMonitor_1) && !within(HasNextMonitorAspectOptimized) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
+	pointcut HasNext_next1(Iterator i) : (call(* Iterator.next()) && target(i)) && !within(HasNextMonitor_1) && !within(trace.StackTrace) && !within(HasNextMonitorAspectOptimized) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !adviceexecution();
 	before (Iterator i) : HasNext_next1(i) {
 		
 		next_counter++;
@@ -347,6 +352,7 @@ public aspect HasNextMonitorAspectOptimized {
 			if(monitor.MOP_fail()) {
 				error_counter++;
 				//System.err.println("! hasNext() has not been called" + " before calling next() for an" + " iterator");
+				errorContext.add(iterContextMap.get(i));
 				monitor.reset();
 			}
 
@@ -368,8 +374,15 @@ public aspect HasNextMonitorAspectOptimized {
 		System.err.println("next counter : " + next_counter);
 		System.err.println("error counter : " + error_counter);
 		System.err.println("---------------------------------------------------------");
+		
+		for(Object i : errorContext)
+			System.err.printf("0x%08X\n",i);
+			
+		System.err.println("---------------------------------------------------------");
 		System.err.println("prob_created counter : " + prob_created);
 		System.err.println("Total contexts : " + monitor_trace_map.size());
+		for(Object in : monitor_trace_map.keySet())
+			System.err.printf("0x%08X\n", in);
 		System.err.println("Creation logged : " + creation_logged);
 		
 		/*
