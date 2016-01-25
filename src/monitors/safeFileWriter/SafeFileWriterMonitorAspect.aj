@@ -220,7 +220,7 @@ public aspect SafeFileWriterMonitorAspect {
 	
 	public static int monitor_counter = 0, write_counter = 0, close_counter = 0, error_counter = 0; 
 
-	pointcut SafeFileWriter_open1() : (call(FileWriter.new(..))) && !within(SafeFileWriterMonitor_1) && !within(SafeFileWriterMonitorAspect) && !adviceexecution();
+	pointcut SafeFileWriter_open1() : (call(FileWriter.new(..))) && !within(SafeFileWriterMonitor_1) && !within(SafeFileWriterMonitorAspect) && !adviceexecution() && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer);
 	after () returning (FileWriter f) : SafeFileWriter_open1() {
 		boolean skipAroundAdvice = false;
 		Object obj = null;
@@ -261,7 +261,7 @@ public aspect SafeFileWriterMonitorAspect {
 		}
 	}
 
-	pointcut SafeFileWriter_write1(FileWriter f) : (call(* write(..)) && target(f)) && !within(SafeFileWriterMonitor_1) && !within(SafeFileWriterMonitorAspect) && !adviceexecution();
+	pointcut SafeFileWriter_write1(FileWriter f) : (call(* write(..)) && target(f)) && !within(SafeFileWriterMonitor_1) && !within(SafeFileWriterMonitorAspect) && !adviceexecution()&& !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer);
 	before (FileWriter f) : SafeFileWriter_write1(f) {
 		
 		write_counter++;
@@ -306,7 +306,7 @@ public aspect SafeFileWriterMonitorAspect {
 		}
 	}
 
-	pointcut SafeFileWriter_close1(FileWriter f) : (call(* close(..)) && target(f)) && !within(SafeFileWriterMonitor_1) && !within(SafeFileWriterMonitorAspect) && !adviceexecution();
+	pointcut SafeFileWriter_close1(FileWriter f) : (call(* close(..)) && target(f)) && !within(SafeFileWriterMonitor_1) && !within(SafeFileWriterMonitorAspect) && !adviceexecution()&& !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer);
 	after (FileWriter f) : SafeFileWriter_close1(f) {
 		
 		close_counter++;
@@ -364,25 +364,25 @@ public aspect SafeFileWriterMonitorAspect {
 		System.err.println("close counter : " + close_counter);
 		System.err.println("error counter : " + error_counter);
 		//memory profiling
-//		
-//		try {
-//			String memoryUsage = new String();
-//			List<MemoryPoolMXBean> pools = ManagementFactory.getMemoryPoolMXBeans();
-//			
-//			for (MemoryPoolMXBean pool : pools) 
-//			{
-//				MemoryUsage peak = pool.getPeakUsage();
-//				memoryUsage += String.format("Peak %s memory used: %,d%n", pool.getName(),peak.getUsed());
-//				memoryUsage += String.format("Peak %s memory reserved: %,d%n", pool.getName(), peak.getCommitted());
-//			}
-//
-//			System.err.println(memoryUsage);
-//
-//		} 
-//		catch (Throwable t) 
-//		{
-//			System.err.println("Exception in agent: " + t);
-//		}
+		
+		try {
+			String memoryUsage = new String();
+			List<MemoryPoolMXBean> pools = ManagementFactory.getMemoryPoolMXBeans();
+			
+			for (MemoryPoolMXBean pool : pools) 
+			{
+				MemoryUsage peak = pool.getPeakUsage();
+				memoryUsage += String.format("Peak %s memory used: %,d%n", pool.getName(),peak.getUsed());
+				memoryUsage += String.format("Peak %s memory reserved: %,d%n", pool.getName(), peak.getCommitted());
+			}
+
+			System.err.println(memoryUsage);
+
+		} 
+		catch (Throwable t) 
+		{
+			System.err.println("Exception in agent: " + t);
+		}
 		
 	}
 

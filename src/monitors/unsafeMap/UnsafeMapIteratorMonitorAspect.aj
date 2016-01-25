@@ -15,11 +15,19 @@
 
 package monitors.unsafeMap;
 
-import java.io.*;
-import java.util.*;
-import org.apache.commons.collections.map.*;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryPoolMXBean;
+import java.lang.management.MemoryUsage;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.collections.map.AbstractReferenceMap;
+import org.apache.commons.collections.map.ReferenceIdentityMap;
 
 class SimpleLinkedList<T> implements Iterable<T>{
 	class Element<T> {
@@ -324,6 +332,9 @@ public aspect UnsafeMapIteratorMonitorAspect {
 		return new SimpleLinkedList();
 	}
 
+	
+	public static int create_coll = 0, create_iter = 0, use_iter = 0, update_map = 0, error_counter = 0;
+	
 	static long timestamp = 1;
 
 	static Map UnsafeMapIterator_map_c_Map = makeMap();
@@ -341,7 +352,7 @@ public aspect UnsafeMapIteratorMonitorAspect {
 	public UnsafeMapIteratorMonitorAspect() {
 	}
 
-	pointcut UnsafeMapIterator_createColl1(Map map) : ((call(* Map.values()) || call(* Map.keySet())) && target(map)) && !within(UnsafeMapIteratorMonitor_1) && !within(UnsafeMapIteratorWrapper) && !within(UnsafeMapIteratorMonitorAspect) && !within(SimpleLinkedList) && !adviceexecution();
+	pointcut UnsafeMapIterator_createColl1(Map map) : ((call(* Map.values()) || call(* Map.keySet())) && target(map)) && !within(UnsafeMapIteratorMonitor_1) && !within(UnsafeMapIteratorWrapper) && !within(UnsafeMapIteratorMonitorAspect) && !within(SimpleLinkedList) && !adviceexecution()&& !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer);
 	after (Map map) returning (Collection c) : UnsafeMapIterator_createColl1(map) {
 		boolean skipAroundAdvice = false;
 		Object obj = null;
@@ -426,6 +437,7 @@ public aspect UnsafeMapIteratorMonitorAspect {
 				} else {
 					monitorWrapper.monitor.createColl(map,c);
 					if(monitorWrapper.monitor.MOP_match()) {
+						error_counter++;
 						System.out.println("unsafe iterator usage!");
 					}
 
@@ -434,7 +446,7 @@ public aspect UnsafeMapIteratorMonitorAspect {
 		}
 	}
 
-	pointcut UnsafeMapIterator_createIter1(Collection c) : (call(* Collection.iterator()) && target(c)) && !within(UnsafeMapIteratorMonitor_1) && !within(UnsafeMapIteratorWrapper) && !within(UnsafeMapIteratorMonitorAspect) && !within(SimpleLinkedList) && !adviceexecution();
+	pointcut UnsafeMapIterator_createIter1(Collection c) : (call(* Collection.iterator()) && target(c)) && !within(UnsafeMapIteratorMonitor_1) && !within(UnsafeMapIteratorWrapper) && !within(UnsafeMapIteratorMonitorAspect) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !within(SimpleLinkedList) && !adviceexecution();
 	after (Collection c) returning (Iterator i) : UnsafeMapIterator_createIter1(c) {
 		boolean skipAroundAdvice = false;
 		Object obj = null;
@@ -641,6 +653,7 @@ public aspect UnsafeMapIteratorMonitorAspect {
 				} else {
 					monitorWrapper.monitor.createIter(c,i);
 					if(monitorWrapper.monitor.MOP_match()) {
+						error_counter++;
 						System.out.println("unsafe iterator usage!");
 					}
 
@@ -649,7 +662,7 @@ public aspect UnsafeMapIteratorMonitorAspect {
 		}
 	}
 
-	pointcut UnsafeMapIterator_useIter1(Iterator i) : (call(* Iterator.next()) && target(i)) && !within(UnsafeMapIteratorMonitor_1) && !within(UnsafeMapIteratorWrapper) && !within(UnsafeMapIteratorMonitorAspect) && !within(SimpleLinkedList) && !adviceexecution();
+	pointcut UnsafeMapIterator_useIter1(Iterator i) : (call(* Iterator.next()) && target(i)) && !within(UnsafeMapIteratorMonitor_1) && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer) && !within(UnsafeMapIteratorWrapper) && !within(UnsafeMapIteratorMonitorAspect) && !within(SimpleLinkedList) && !adviceexecution();
 	before (Iterator i) : UnsafeMapIterator_useIter1(i) {
 		boolean skipAroundAdvice = false;
 		Object obj = null;
@@ -701,6 +714,7 @@ public aspect UnsafeMapIteratorMonitorAspect {
 				} else {
 					monitorWrapper.monitor.useIter(i);
 					if(monitorWrapper.monitor.MOP_match()) {
+						error_counter++;
 						System.out.println("unsafe iterator usage!");
 					}
 
@@ -709,7 +723,7 @@ public aspect UnsafeMapIteratorMonitorAspect {
 		}
 	}
 
-	pointcut UnsafeMapIterator_updateMap1(Map map) : ((call(* Map.put*(..)) || call(* Map.putAll*(..)) || call(* Map.clear()) || call(* Map.remove*(..))) && target(map)) && !within(UnsafeMapIteratorMonitor_1) && !within(UnsafeMapIteratorWrapper) && !within(UnsafeMapIteratorMonitorAspect) && !within(SimpleLinkedList) && !adviceexecution();
+	pointcut UnsafeMapIterator_updateMap1(Map map) : ((call(* Map.put*(..)) || call(* Map.putAll*(..)) || call(* Map.clear()) || call(* Map.remove*(..))) && target(map)) && !within(UnsafeMapIteratorMonitor_1) && !within(UnsafeMapIteratorWrapper) && !within(UnsafeMapIteratorMonitorAspect) && !within(SimpleLinkedList) && !adviceexecution() && !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer);
 	after (Map map) : UnsafeMapIterator_updateMap1(map) {
 		boolean skipAroundAdvice = false;
 		Object obj = null;
@@ -761,12 +775,49 @@ public aspect UnsafeMapIteratorMonitorAspect {
 				} else {
 					monitorWrapper.monitor.updateMap(map);
 					if(monitorWrapper.monitor.MOP_match()) {
+						error_counter++;
 						System.out.println("unsafe iterator usage!");
 					}
 
 				}
 			}
 		}
+	}
+	
+	pointcut System_exit(): (call (* System.exit(int)));
+
+	before(): System_exit(){
+		//System.err.println("About to print the statistics--- \n");
+	}
+
+	void around(): System_exit(){
+		
+		System.err.println("Create collection event : " + create_coll);
+		System.err.println("Create iterator event : " + create_iter);
+		System.err.println("use iterator event : " + use_iter);
+		System.err.println("update map event : " + update_map);
+		System.err.println("Error counter : " + error_counter);
+		//memory profiling
+		
+		try {
+			String memoryUsage = new String();
+			List<MemoryPoolMXBean> pools = ManagementFactory.getMemoryPoolMXBeans();
+			
+			for (MemoryPoolMXBean pool : pools) 
+			{
+				MemoryUsage peak = pool.getPeakUsage();
+				memoryUsage += String.format("Peak %s memory used: %,d%n", pool.getName(),peak.getUsed());
+				memoryUsage += String.format("Peak %s memory reserved: %,d%n", pool.getName(), peak.getCommitted());
+			}
+
+			System.err.println(memoryUsage);
+
+		} 
+		catch (Throwable t) 
+		{
+			System.err.println("Exception in agent: " + t);
+		}
+		
 	}
 
 }
