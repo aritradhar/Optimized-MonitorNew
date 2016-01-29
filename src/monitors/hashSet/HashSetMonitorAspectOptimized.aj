@@ -50,12 +50,12 @@ public aspect HashSetMonitorAspectOptimized {
 	static volatile Map<Long, List<Object>> monitor_trace_map = new ConcurrentHashMap<>();
 	public static volatile int add_counter = 0, contain_counter = 0, 
 			remove_counter = 0, monitor_counter = 0, error_counter = 0;
-	
-	pointcut SafeHashSet_add1(HashSet t, Object o) : (call(* Collection+.add(Object)) && target(t) && args(o)) && !within(SafeHashSetMonitor_1) && !within(HashSetMonitorAspect) && !adviceexecution();
+
+	pointcut SafeHashSet_add1(HashSet t, Object o) : (call(* Collection+.add(Object)) && target(t) && args(o)) && !within(SafeHashSetMonitor_1) && !within(HashSetMonitorAspect) && !adviceexecution()&& !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer);
 	after (HashSet t, Object o) : SafeHashSet_add1(t, o) {
-		
+
 		add_counter++;
-		
+
 		boolean skipAroundAdvice = false;
 		Object obj = null;
 
@@ -92,10 +92,10 @@ public aspect HashSetMonitorAspectOptimized {
 					List<Object> monitors = monitor_trace_map.get(currentStackTrace);
 					int creationCounter = monitors.size();
 					double monitorCreationProb = SafeHashSetMonitor_1.getMonitorCreation(creationCounter);
-					
+
 					if(new Random().nextDouble() < monitorCreationProb)
 					{
-						
+
 						monitor = new SafeHashSetMonitor_1();
 						m.put(o, monitor);
 						monitors.add(monitor);
@@ -104,7 +104,7 @@ public aspect HashSetMonitorAspectOptimized {
 						monitor_counter++;
 					}
 				}
-				
+
 				else
 				{
 					monitor = new SafeHashSetMonitor_1();
@@ -145,6 +145,7 @@ public aspect HashSetMonitorAspectOptimized {
 			}//end of adding
 		}
 
+		if(monitor != null)
 		{
 			monitor.add(t,o);
 			if(monitor.MOP_match()) {
@@ -156,11 +157,11 @@ public aspect HashSetMonitorAspectOptimized {
 		}
 	}
 
-	pointcut SafeHashSet_unsafe_contains1(HashSet t, Object o) : (call(* Collection+.contains(Object)) && target(t) && args(o)) && !within(SafeHashSetMonitor_1) && !within(HashSetMonitorAspect) && !adviceexecution();
+	pointcut SafeHashSet_unsafe_contains1(HashSet t, Object o) : (call(* Collection+.contains(Object)) && target(t) && args(o)) && !within(SafeHashSetMonitor_1) && !within(HashSetMonitorAspect) && !adviceexecution()&& !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer);
 	before (HashSet t, Object o) : SafeHashSet_unsafe_contains1(t, o) {
-		
+
 		contain_counter++;
-		
+
 		boolean skipAroundAdvice = false;
 		Object obj = null;
 
@@ -191,17 +192,17 @@ public aspect HashSetMonitorAspectOptimized {
 				//monitor = new SafeHashSetMonitor_1();
 				//m.put(o, monitor);
 				//new addition
-				
+
 				long currentStackTrace = StackTrace.trace;
 				if(monitor_trace_map.containsKey(currentStackTrace))
 				{
 					List<Object> monitors = monitor_trace_map.get(currentStackTrace);
 					int creationCounter = monitors.size();
 					double monitorCreationProb = SafeHashSetMonitor_1.getMonitorCreation(creationCounter);
-					
+
 					if(new Random().nextDouble() < monitorCreationProb)
 					{
-						
+
 						monitor = new SafeHashSetMonitor_1();
 						m.put(o, monitor);
 						monitors.add(monitor);
@@ -210,7 +211,7 @@ public aspect HashSetMonitorAspectOptimized {
 						monitor_counter++;
 					}
 				}
-				
+
 				else
 				{
 					monitor = new SafeHashSetMonitor_1();
@@ -220,10 +221,11 @@ public aspect HashSetMonitorAspectOptimized {
 					monitor_trace_map.put(currentStackTrace, monitors);
 					monitor_counter++;
 				}
-				
+
 			}
 
 		}
+
 		if(toCreate) {
 			m = SafeHashSet_t_Map;
 			if (m == null) m = SafeHashSet_t_Map = makeMap(t);
@@ -251,6 +253,8 @@ public aspect HashSetMonitorAspectOptimized {
 			}//end of adding
 		}
 
+		//System.err.println("Here");
+		if(monitor != null)
 		{
 			monitor.unsafe_contains(t,o);
 			if(monitor.MOP_match()) {
@@ -262,11 +266,11 @@ public aspect HashSetMonitorAspectOptimized {
 		}
 	}
 
-	pointcut SafeHashSet_remove1(HashSet t, Object o) : (call(* Collection+.remove(Object)) && target(t) && args(o)) && !within(SafeHashSetMonitor_1) && !within(HashSetMonitorAspect) && !adviceexecution();
+	pointcut SafeHashSet_remove1(HashSet t, Object o) : (call(* Collection+.remove(Object)) && target(t) && args(o)) && !within(SafeHashSetMonitor_1) && !within(HashSetMonitorAspect) && !adviceexecution()&& !within(EDU.purdue.cs.bloat.trans.CompactArrayInitializer);
 	after (HashSet t, Object o) : SafeHashSet_remove1(t, o) {
-		
+
 		remove_counter++;
-		
+
 		boolean skipAroundAdvice = false;
 		Object obj = null;
 
@@ -297,17 +301,17 @@ public aspect HashSetMonitorAspectOptimized {
 				//monitor = new SafeHashSetMonitor_1();
 				//m.put(o, monitor);
 				//new addition
-				
+
 				long currentStackTrace = StackTrace.trace;
 				if(monitor_trace_map.containsKey(currentStackTrace))
 				{
 					List<Object> monitors = monitor_trace_map.get(currentStackTrace);
 					int creationCounter = monitors.size();
 					double monitorCreationProb = SafeHashSetMonitor_1.getMonitorCreation(creationCounter);
-					
+
 					if(new Random().nextDouble() < monitorCreationProb)
 					{
-						
+
 						monitor = new SafeHashSetMonitor_1();
 						m.put(o, monitor);
 						monitors.add(monitor);
@@ -316,7 +320,7 @@ public aspect HashSetMonitorAspectOptimized {
 						monitor_counter++;
 					}
 				}
-				
+
 				else
 				{
 					monitor = new SafeHashSetMonitor_1();
@@ -326,7 +330,7 @@ public aspect HashSetMonitorAspectOptimized {
 					monitor_trace_map.put(currentStackTrace, monitors);
 					monitor_counter++;
 				}
-				
+
 			}
 
 		}
@@ -357,6 +361,7 @@ public aspect HashSetMonitorAspectOptimized {
 			}//end of adding
 		}
 
+		if(monitor != null)
 		{
 			monitor.remove(t,o);
 			if(monitor.MOP_match()) {
@@ -381,6 +386,7 @@ public aspect HashSetMonitorAspectOptimized {
 		System.err.println("contain counter : " + contain_counter);
 		System.err.println("remove counter : " + remove_counter);		
 		System.err.println("error counter : " + error_counter);
+		System.err.println("Context count : " + monitor_trace_map.size());
 		System.err.println("---------------------------------------------------------");
 	}
 

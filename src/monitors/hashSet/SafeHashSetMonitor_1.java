@@ -144,35 +144,35 @@ public class SafeHashSetMonitor_1 implements Cloneable {
 		}
 
 		else if(count>=10 && count<50){
-			monitorCreationProbability=0.05;
+			monitorCreationProbability=0.5;
 		}
 
 		else if(count>=50 && count<100){
-			monitorCreationProbability=0.0125;
+			monitorCreationProbability=0.125;
 		}
 
 		else if(count>=100 && count<500){
-			monitorCreationProbability=0.00125;
+			monitorCreationProbability=0.0125;
 		}
 
 		else if(count>=500 && count<1000){
-			monitorCreationProbability=0.00625;
+			monitorCreationProbability=0.0625;
 		}
 
 		else if(count>=1000 && count<2000){
-			monitorCreationProbability=0.003125;
+			monitorCreationProbability=0.03125;
 		}
 
 		else if(count>=2000 && count<4000){
-			monitorCreationProbability=0.0015625;
+			monitorCreationProbability=0.015625;
 		}
 		
 		else if(count>=4000 && count<7000){
-			monitorCreationProbability=0.00078125;
+			monitorCreationProbability=0.0078125;
 		}
 		
 		else if(count>=7000 && count<10000){
-			monitorCreationProbability=0.000390625;
+			monitorCreationProbability=0.00390625;
 		}
 		
 		else{
