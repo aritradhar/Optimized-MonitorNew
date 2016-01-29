@@ -288,6 +288,12 @@ public aspect HashSetMonitorAspect {
 			{
 				monitor = new SafeHashSetMonitor_1();
 				m.put(o, monitor);
+				if(EV.optimized)
+				{
+					List<Object> monitors = new ArrayList<>();
+					monitors.add(monitor);	
+					monitor_trace_map.put(StackTrace.trace, monitors);
+				}
 			}
 
 		}
