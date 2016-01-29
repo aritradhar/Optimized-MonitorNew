@@ -155,11 +155,11 @@ class HasNextMonitor_1 implements Cloneable {
 		}
 
 		else if(count>=50 && count<100){
-			monitorCreationProbability=0.25;
+			monitorCreationProbability=0.125;
 		}
 
 		else if(count>=100 && count<500){
-			monitorCreationProbability=0.125;
+			monitorCreationProbability=0.0125;
 		}
 
 		else if(count>=500 && count<1000){
