@@ -62,7 +62,7 @@ public aspect HashSetMonitorAspectRandom {
 		SafeHashSetMonitor_1 monitor = null;
 		boolean toCreate = false;
 
-		Map m = SafeHashSet_t_o_Map;
+		Map<Object, Object> m = SafeHashSet_t_o_Map;
 		if(m == null){
 			synchronized(indexing_lock) {
 				m = SafeHashSet_t_o_Map;
@@ -90,17 +90,13 @@ public aspect HashSetMonitorAspectRandom {
 				if(monitor_trace_map.containsKey(currentStackTrace))
 				{
 					List<Object> monitors = monitor_trace_map.get(currentStackTrace);
-					int creationCounter = monitors.size();
-					double monitorCreationProb = SafeHashSetMonitor_1.getMonitorCreation(creationCounter);
 
-					if(new Random().nextDouble() < monitorCreationProb)
+					if(new Random().nextInt() % 2 == 0)
 					{
-
 						monitor = new SafeHashSetMonitor_1();
 						m.put(o, monitor);
 						monitors.add(monitor);
 						monitor_trace_map.put(currentStackTrace, monitors);
-
 						monitor_counter++;
 					}
 				}
