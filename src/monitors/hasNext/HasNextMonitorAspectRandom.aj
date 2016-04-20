@@ -21,6 +21,7 @@ public aspect HasNextMonitorAspectRandom {
 		return new ArrayList<>();
 	}
 
+	public static Random rand = new Random();
 	static volatile Map<Object, Object> indexing_lock = new HashMap<>();
 
 	static volatile Map<Object, Object> HasNext_i_Map = null;
@@ -68,7 +69,7 @@ public aspect HasNextMonitorAspectRandom {
 				{
 					List<Object> monitors = monitor_trace_map.get(currentStackTrace);
 					
-					if(new Random().nextInt() % 2 == 0)
+					if(rand.nextInt() % 2 == 0)
 					{
 						prob_created++;
 						monitor = new HasNextMonitor_1();

@@ -43,7 +43,7 @@ public aspect HashSetMonitorAspectRandom {
 	}
 
 	static Map<Object, Object> indexing_lock = new HashMap<>();
-
+	public static Random rand = new Random();
 	static Map<Object, Object> SafeHashSet_t_o_Map = null;
 	static Map<Object, Object> SafeHashSet_t_Map = null;
 	static Map<Object, Object> SafeHashSet_o_Map = null;
@@ -91,7 +91,7 @@ public aspect HashSetMonitorAspectRandom {
 				{
 					List<Object> monitors = monitor_trace_map.get(currentStackTrace);
 
-					if(new Random().nextInt() % 2 == 0)
+					if(rand.nextInt() % 2 == 0)
 					{
 						monitor = new SafeHashSetMonitor_1();
 						m.put(o, monitor);
